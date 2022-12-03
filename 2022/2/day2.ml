@@ -1,10 +1,4 @@
-let fold f start filename =
-  let rec loop f acc ch =
-      match In_channel.input_line ch with
-      | Some x -> loop f (f acc x) ch
-      | None -> acc
-  in
-  In_channel.with_open_bin filename (fun ch -> loop f start ch)
+module Input = Helper.Input
 
 type play =
   | Rock
@@ -76,7 +70,7 @@ let score_strategy strategy s =
     let elf, _ as line = line s in
     x + score_all (elf, strategy line)
   in
-  fold add_score_line 0 s
+  Input.fold add_score_line 0 s
 
 let () =
   Format.printf "score=%d@." (score_strategy state_interpretation "2/data/input")
