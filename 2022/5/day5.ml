@@ -33,15 +33,6 @@ let move_new order state =
 let top state =
   Array.map List.hd state
 
-let none _ppf () = ()
-let comma ppf () = Format.fprintf ppf ",@ "
-let _int ppf = Format.fprintf ppf "%d"
-let char ppf = Format.fprintf ppf "%c"
-
-let _list ?(sep=comma) elt ppf x = Format.pp_print_list ~pp_sep:sep elt ppf x
-let array ?(sep=comma) elt ppf x = Format.pp_print_seq ~pp_sep:sep elt ppf (Array.to_seq x)
-
-
 let check_horizontal s = String.contains s '['
 
 let parse_horizontal s =
@@ -83,5 +74,5 @@ let () =
   let result = Helper.Input.fold (folder move_new) (First []) "./5/data/input" in
   match result with
   | Order a ->
-    Format.printf "@[result=[%a]@]@." (array ~sep:none char) (top a)
+    Format.printf "@[result=[%a]@]@." Helper.Pp.(array ~sep:none char) (top a)
   | _ -> assert false

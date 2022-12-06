@@ -1,13 +1,12 @@
 module Input = Helper.Input
-
-let failf fmt = Format.kfprintf (fun ppf -> Format.fprintf ppf "@."; exit 2) Format.err_formatter fmt
+module Pp = Helper.Pp
 module Char_set = Set.Make(Char)
 
 
 let score = function
   | 'a'..'z' as c ->  Char.code c - Char.code 'a' + 1
   | 'A' .. 'Z' as c -> Char.code c - Char.code 'A' + 27
-  | c -> failf "Invalid character:%c" c
+  | c -> Pp.failf "Invalid character:%c" c
 
 
 let to_set s = String.fold_left (fun set c -> Char_set.add c set) Char_set.empty s
@@ -16,7 +15,7 @@ module Part_1() = struct
   let parse s =
     let n = String.length s in
     let half =
-      if n mod 2 = 1 then failf "Odd string length for %S" s
+      if n mod 2 = 1 then Pp.failf "Odd string length for %S" s
       else n/2
     in
     let s1 = String.sub s 0 half and s2 = String.sub s half half in
@@ -26,8 +25,8 @@ module Part_1() = struct
     let inter = Char_set.inter set1 set2 in
     match Char_set.elements inter with
     | [x] -> score x
-    | [] -> failf "No common element"
-    | a :: b :: _ -> failf "More than one common element: %c and %c" a b
+    | [] -> Pp.failf "No common element"
+    | a :: b :: _ -> Pp.failf "More than one common element: %c and %c" a b
 
   let () =
     let add_score score s = score + line_score (parse s) in
@@ -46,11 +45,11 @@ let badge array =
   let inter = array.(0) ^ array.(1) ^ array.(2) in
   match Char_set.elements inter with
   | [x] -> x
-  | [] -> failf "@[No badge: %a, %a, %a@]"
+  | [] -> Pp.failf "@[No badge: %a, %a, %a@]"
             pp_set array.(0)
             pp_set array.(1)
             pp_set array.(2)
-  | a :: b :: _ -> failf "Multiple badge found: %c %c?" a b
+  | a :: b :: _ -> Pp.failf "Multiple badge found: %c %c?" a b
 
 let parse = Array.map to_set
 
