@@ -5,7 +5,7 @@ type entry =
   | Dir of string
   | File of int
 
-type dir = { size:int; size_below_threshold:int; name:string}
+type dir = { children: dir list; size:int; size_below_threshold:int; name:string}
 
 let add_threshold th sum x = if x > th then sum else sum + x
 
@@ -27,8 +27,7 @@ let up (th:int) z = match z.focus, z.path with
         (List.fold_left (fun sum (d:dir) -> sum + d.size_below_threshold) 0 left)
         size
     in
-    Format.printf "@[dir=%a size=%d, size_below=%d@]@." (Pp.list ~sep:slash string) (List.rev z.dirpath) size size_below_threshold;
-    let dir = { size; name=z.name; size_below_threshold } in
+    let dir = { size; name=z.name; size_below_threshold; children=left } in
     { focus = { parent with left = dir :: parent.left; size_below_threshold };
       dirpath = List.tl z.dirpath;
       name = "*"; path }
@@ -99,10 +98,23 @@ let rec parse (th:int) (zipper,state) line =
         parse th  (zipper, next_move zipper) line
     end
 
+
+let rec find_smallest min current_best (d:dir) =
+  if d.size >= min && d.size < current_best then
+    find_all_smallest min d.size d.children
+  else if d.size < min then current_best
+  else find_all_smallest min current_best d.children
+and find_all_smallest min current_best l =
+  List.fold_left (find_smallest min) current_best l
+
 let rec all_up th (z: cursor zipper) = match z.path with
-  | [] -> z.focus.size_below_threshold
+  | [] -> assert false
   | [_] ->
-    List.fold_left (fun sum (d:dir) -> sum + d.size_below_threshold) 0 z.focus.left
+    let part1 = List.fold_left (fun sum (d:dir) -> sum + d.size_below_threshold) 0 z.focus.left in
+    let system_size = 70000000 in
+    let update_size = 30000000 in
+    let size = List.fold_left (fun sum d -> sum + d.size) 0 z.focus.left + z.focus.file_size in
+    part1, find_all_smallest ( update_size + size - system_size) (system_size) z.focus.left
   | _ -> all_up th (up th z)
 
 let () =
@@ -112,5 +124,5 @@ let () =
   in
   let zipper = { focus; name=""; dirpath= []; path = [] } in
   let z, _ =  Helper.Input.fold (parse th) (zipper, Down) "7/data/input" in
-  let s = all_up th z in
-  Format.printf "size=%d@." s
+  let _s, min_size = all_up th z in
+  Format.printf "min size=%d@." min_size
