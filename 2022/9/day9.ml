@@ -1,16 +1,6 @@
 [@@@warning "-unused-value-declaration"]
 
-module Vec = struct
-  type t = { x:int; y:int }
-  let dist_inf v w = max (abs (v.x - w.x)) (abs (v.y - w.y))
-  let compare: t -> t -> int = Stdlib.compare
-  let map f v = { x = f v.x; y = f v.y }
-                let make x y = {x;y}
-  let (+) v w = { x= v.x + w.x; y = v.y + w.y }
-  let (-) v w = { x= v.x - w.x; y = v.y - w.y }
-  let pp ppf v = Format.fprintf ppf "(%d %d)" v.x v.y
-
-end
+module Vec = Helper.Vec2
 
 let parse_dir = function
   | "U" | "u" -> Vec.make 0 1
