@@ -1,0 +1,4 @@
+(menhir (modules parser))
+(ocamllex (modules lexer))
+
+(executable (name day13) (libraries helper))

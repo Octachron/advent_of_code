@@ -92,20 +92,6 @@ let round worry_decrease monkeys queues activities =
 
 let rec repeat n f = if n = 0 then () else (f (); repeat (n-1) f)
 
-let fold_block sep f start filename =
-  let g (line_acc, acc) s =
-    if sep s then
-      let block = List.rev line_acc in
-      ([],f acc block)
-    else
-      (s :: line_acc, acc)
-  in
-  let lines, acc = Helper.Input.fold g ([],start) filename in
-  match lines with
-  | [] -> acc
-  | some -> f acc (List.rev some)
-
-
 let parse_id s = Scanf.sscanf s "Monkey %d:" (fun d -> d)
 let parse_cond s = Scanf.sscanf s " Test: divisible by %d" (fun n -> Divisibility n)
 let parse_then s = Scanf.sscanf s " If true: throw to monkey %d" (fun d -> d)
@@ -189,7 +175,7 @@ let monkey_div (monkey:monkey) = let Divisibility n = monkey.test.cond in n
 
 let () =
   let items_and_monkeys =
-    Array.of_list @@ List.rev @@ fold_block (fun s -> s = "" || s = "\n") parse_entry [] "11/data/input"
+    Array.of_list @@ List.rev @@ Helper.Input.fold_block (fun s -> s = "" || s = "\n") parse_entry [] "11/data/input"
  in
  let monkeys = Array.map snd items_and_monkeys in
  let activities = Array.map (fun _ -> 0) items_and_monkeys in

@@ -18,3 +18,17 @@ let group_by k f start filename =
   in
   let _,_, result = fold folder (init start) filename in
   result
+
+
+let fold_block sep f start filename =
+  let g (line_acc, acc) s =
+    if sep s then
+      let block = List.rev line_acc in
+      ([],f acc block)
+    else
+      (s :: line_acc, acc)
+  in
+  let lines, acc = fold g ([],start) filename in
+  match lines with
+  | [] -> acc
+  | some -> f acc (List.rev some)

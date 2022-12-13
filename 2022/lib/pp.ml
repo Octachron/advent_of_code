@@ -1,5 +1,7 @@
 let none _ppf () = ()
 let comma ppf () = Format.fprintf ppf ",@ "
+let break ppf () = Format.fprintf ppf "@,"
+
 let int ppf = Format.fprintf ppf "%d"
 let char ppf = Format.fprintf ppf "%c"
 let ostring ppf s = Format.fprintf ppf "%S" s
