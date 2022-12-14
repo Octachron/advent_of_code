@@ -1,56 +1,5 @@
-
-module Index = struct
-  type t = int * int
-
-let fold f start (dim_x, dim_y) =
-  let rec loop f acc i j =
-    if i >= dim_x then
-      loop f acc 0 (j+1)
-    else if j >= dim_y then
-      acc
-    else
-      loop f (f acc (i,j)) (i+1) j
-  in
-  loop f start 0 0
-
-
-  let (+) (a,b) (x,y) = a + x, b + y
-  let (<<) (a,b) (x,y) = a < x && b < y
-
-let iter f (dim_x,dim_y) =
-  for i = 0 to dim_x -1 do
-    for j = 0 to dim_y - 1 do
-       f (i,j);
-    done;
-  done
-
-
-end
-
-
-type 'a matrix = { dims: Index.t; data: 'a array }
-let (.!()) mat (x,y) =
-  mat.data.(x + y * fst mat.dims)
-
-let make dims x = { dims; data = Array.make (fst dims * snd dims) x }
-
-
-let (.!()<-) mat (x,y) z =
-  mat.data.(x + y * fst mat.dims) <- z
-
-
-
-let init dims f =
-  let mat = make dims (f (0,0)) in
-  Index.iter (fun pos -> mat.!(pos) <- f pos) dims;
-  mat
-
-
-let rec seq mat ~pos ~dir () =
-  if Index.(pos << mat.dims && (-1,-1) << pos) then
-     Seq.Cons((pos,mat.!(pos)), seq mat ~pos:Index.(pos + dir) ~dir)
-  else
-    Seq.Nil
+open Helper.Grid
+module Vec = Helper.Vec2
 
 type state = Visible | Hidden
 let update ~dir ~start visibility sizes =
@@ -66,15 +15,15 @@ let update ~dir ~start visibility sizes =
   ()
 
 let compute_visibility sizes =
-  let dim_x, dim_y = sizes.dims in
+  let {Vec.x=dim_x; y=dim_y} = sizes.dims in
   let visibility = make sizes.dims Hidden in
   for i = 0 to (dim_x - 1) do
-    update ~dir:(0,1) ~start:(i,0) visibility sizes;
-    update ~dir:(0,-1) ~start:(i,dim_y - 1) visibility sizes;
+    update ~dir:(Vec.make 0 1) ~start:(Vec.make i 0) visibility sizes;
+    update ~dir:(Vec.make 0 (-1)) ~start:(Vec.make i (dim_y - 1)) visibility sizes;
   done;
   for j = 0 to (dim_y - 1) do
-    update ~dir:(1,0) ~start:(0,j) visibility sizes;
-    update ~dir:(-1,0) ~start:(dim_x - 1,j) visibility sizes;
+    update ~dir:(Vec.make 1 0) ~start:(Vec.make 0 j) visibility sizes;
+    update ~dir:(Vec.make (-1) 0) ~start:(Vec.make (dim_x - 1) j) visibility sizes;
   done;
   visibility
 
@@ -88,10 +37,13 @@ let scenic_score sizes start =
       else (Some size, n + 1)
   in
   let dir_score dir =
-    let _, n = Seq.fold_left f (Some size,0) (seq sizes ~pos:Index.(start+dir) ~dir) in
+    let _, n = Seq.fold_left f (Some size,0) (seq sizes ~pos:Vec.(start+dir) ~dir) in
     n
   in
-  dir_score (0,1) * dir_score (1,0) * dir_score (0,-1) * dir_score (-1,0)
+  dir_score (Vec.make 0 1)
+  * dir_score (Vec.make 1 0)
+  * dir_score (Vec.make 0 (-1))
+  * dir_score (Vec.make (-1) 0)
 
 let n_visible visibility =
   Array.fold_left
@@ -116,7 +68,7 @@ let () =
   let dim_x = Array.length arrays in
   let dim_y = Array.length (arrays.(0)) in
   let () = assert (Array.for_all (fun a -> Array.length a = dim_y ) arrays) in
-  let mat = init (dim_x,dim_y) (fun (i,j) -> arrays.(i).(j)) in
+  let mat = init (Vec.make dim_x dim_y) (fun v -> arrays.(v.x).(v.y)) in
   let visibility = compute_visibility mat in
   let scenic_score = Index.fold (score_scene mat) (-1) mat.dims in
   Format.printf "n visible=%d score=%d@." (n_visible visibility) scenic_score
