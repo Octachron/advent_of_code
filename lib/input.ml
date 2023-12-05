@@ -32,3 +32,7 @@ let fold_block sep f start filename =
   match lines with
   | [] -> acc
   | some -> f acc (List.rev some)
+
+let rec num_list is_sep bf =
+  if Scanf.Scanning.end_of_input bf || Scanf.bscanf bf "%0c" is_sep then [] else
+  Scanf.bscanf bf "%d %r" (num_list is_sep) (fun s l -> s :: l )
