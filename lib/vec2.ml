@@ -3,7 +3,7 @@ type t = { x:int; y:int }
 let dist_inf v w = max (abs (v.x - w.x)) (abs (v.y - w.y))
 let dist_1 v w = (abs (v.x - w.x)) + (abs (v.y - w.y))
 
-
+let zero = { x=0; y = 0 }
 let compare: t -> t -> int = Stdlib.compare
 let map f v = { x = f v.x; y = f v.y }
 let make x y = {x;y}
