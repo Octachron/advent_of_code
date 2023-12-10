@@ -139,7 +139,12 @@ module Part_2 = struct
       | [] -> assert false
       | i :: _ -> i.start
     in
-    Format.printf "smallest location = %d@." smallest_location
+    let interval_measure = List.fold_left (fun acc i ->
+        let acc' = acc + (i.stop - i.start) in
+        assert (acc' > acc);
+        acc'
+      ) 0 candidates in
+    Format.printf "smallest location = %d | %d locations @." smallest_location interval_measure
 
 end
 
