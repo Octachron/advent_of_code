@@ -36,3 +36,10 @@ let fold_block sep f start filename =
 let rec num_list is_sep bf =
   if Scanf.Scanning.end_of_input bf || Scanf.bscanf bf "%0c" is_sep then [] else
   Scanf.bscanf bf "%d %r" (num_list is_sep) (fun s l -> s :: l )
+
+let rec comma_int_list bf =
+    let d = Scanf.bscanf bf "%d" Fun.id in
+    if Scanf.Scanning.end_of_input bf then [d]
+    else
+      let () = Scanf.bscanf bf "," () in
+      d :: comma_int_list bf
