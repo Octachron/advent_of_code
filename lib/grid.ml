@@ -1,3 +1,4 @@
+
 module Index = struct
   type t = Vec2.t
   let fold f start {Vec2.x; y} =
@@ -48,3 +49,34 @@ let rec seq mat ~pos ~dir () =
      Seq.Cons((pos,mat.!(pos)), seq mat ~pos:Vec2.(pos + dir) ~dir)
   else
     Seq.Nil
+
+let parse_line elt acc x =
+  Array.init (String.length x) (fun i -> elt x.[i]) :: acc
+
+let parse elt filename =
+  let rev = Input.fold (parse_line elt) [] filename in
+  Array.of_list @@ List.rev rev
+
+let in_grid grid (v:Vec2.t) =
+  v.x >= 0 && v.y >= 0 && v.x < Array.length grid && v.y < Array.length grid.(v.x)
+
+module Dir = struct
+  type t =
+    | Up
+    | Down
+    | Left
+    | Right
+
+
+  let pp ppf = function
+    | Left -> Format.fprintf ppf "←"
+    | Right -> Format.fprintf ppf "→"
+    | Up -> Format.fprintf ppf "↑"
+    | Down -> Format.fprintf ppf "↓"
+
+  let vec2 = function
+    | Up -> Vec2.make (-1) 0
+    | Down -> Vec2.make (1) 0
+    | Left -> Vec2.make 0 (-1)
+    | Right -> Vec2.make 0 1
+end
