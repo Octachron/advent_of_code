@@ -1,4 +1,5 @@
 open Helper.Grid
+module G = Helper.Grid
 module Vec = Helper.Vec2
 
 type state = Visible | Hidden
@@ -46,9 +47,9 @@ let scenic_score sizes start =
   * dir_score (Vec.make (-1) 0)
 
 let n_visible visibility =
-  Array.fold_left
+  G.fold
     (fun sum v -> sum + (if v = Visible then 1 else 0))
-    0 visibility.data
+    0 visibility
 
 let parse_line lines line =
   let array =
